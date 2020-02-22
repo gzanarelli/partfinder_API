@@ -4,7 +4,6 @@ const express = require('express')
 const app = express()
 const boom = require('boom')
 const cors = require('cors')
-require('dotenv').config()
 
 /**
  * Set configs
