@@ -14,8 +14,6 @@ WORKDIR /app
 
 COPY . /app
 
-RUN chmod +x /app/start.sh
-
 RUN yarn
 
 CMD npm run dev
