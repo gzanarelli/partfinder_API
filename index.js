@@ -4,6 +4,10 @@ const express = require('express')
 const app = express()
 const boom = require('boom')
 const cors = require('cors')
+const glob = require('glob')
+const path = require('path')
+const router = express.Router()
+const debug = require('debug')('partfinder:start:controller')
 
 /**
  * Set configs
@@ -16,6 +20,17 @@ app.use(express.urlencoded({ extended: false }))
  * Connect to Mongo Database
  */
 require('./Libs/mongo')
+
+/**
+ * Middleware controllers
+ */
+glob
+  .sync(path.join(__dirname, '/./controllers/*.js'))
+  .map(function (controller) {
+    debug('Require controller %s', controller)
+		require(controller)(router)
+  })
+
 
 /**
  * Middleware Error
