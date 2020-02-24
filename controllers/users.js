@@ -14,12 +14,12 @@ const mongoose = require('mongoose')
 router.get('/',
   auth,
   async (req, res, next) => {
-		User.findOne({ _id: _.get(req, 'token._id', null) }).populate('geolocation').populate('sport')
-		.then(user => {
-			res.json(_.omit(user, ['password', 'email']))
-		})
-		.catch(err => next(err))
-	}
+    User.findOne({ _id: _.get(req, 'token._id', null) }).populate('geolocation').populate('sport')
+      .then(user => {
+        res.json(_.omit(user, ['password', 'email']))
+      })
+      .catch(err => next(err))
+  }
 )
 
 router.post('/',
@@ -56,22 +56,22 @@ router.post('/',
       { _id: _.get(req, 'token._id', null) },
       { $set: data, location: Id }
     ).then(async (user) => {
-			if (!user) {
-				return next(boom.unauthorized())
-			}
-			await new GeolocModel({
-				_id: Id,
-				userId: req.token._id,
-				address: req.body.address,
-				zipcode: req.body.zipcode,
-				city: req.body.city,
-				'location.coordinates': [coor[0].longitude, coor[0].latitude],
-				'location.type': 'Point'
-			}).save()
-			res.json({ status: true })
-		})
-		.catch(err => next(err))
-})
+      if (!user) {
+        return next(boom.unauthorized())
+      }
+      await new GeolocModel({
+        _id: Id,
+        userId: req.token._id,
+        address: req.body.address,
+        zipcode: req.body.zipcode,
+        city: req.body.city,
+        'location.coordinates': [coor[0].longitude, coor[0].latitude],
+        'location.type': 'Point'
+      }).save()
+      res.json({ status: true })
+    })
+      .catch(err => next(err))
+  })
 
 router.patch('/',
   body('firstname')
@@ -105,21 +105,21 @@ router.patch('/',
     User.updateOne(
       { _id: _.get(req, 'token._id', null) },
       { $set: data }
-		).then(async (user) => {
-			if (!user) {
-				return next(boom.unauthorized())
-			}
-			await new GeolocModel({
-				userId: req.token._id,
-				address: req.body.address,
-				zipcode: req.body.zipcode,
-				city: req.body.city,
-				'location.coordinates': [coor[0].longitude, coor[0].latitude],
-				'location.type': 'Point'
-			})
-			res.json({ status: true })	
-		})
-		.catch(err => next(err))
+    ).then(async (user) => {
+      if (!user) {
+        return next(boom.unauthorized())
+      }
+      await new GeolocModel({
+        userId: req.token._id,
+        address: req.body.address,
+        zipcode: req.body.zipcode,
+        city: req.body.city,
+        'location.coordinates': [coor[0].longitude, coor[0].latitude],
+        'location.type': 'Point'
+      })
+      res.json({ status: true })
+    })
+      .catch(err => next(err))
   }
 )
 
@@ -127,13 +127,13 @@ router.delete('/:userId',
   auth,
   async (req, res, next) => {
     User.deleteOne({ _id: _.get(req, 'token._id', null) })
-		.then(() => {
-			res.json({ status: true })
-		})
-		.catch(err => next(err))
+      .then(() => {
+        res.json({ status: true })
+      })
+      .catch(err => next(err))
   }
 )
 
 module.exports = (app) => {
-	app.use('/account', router)
+  app.use('/account', router)
 }

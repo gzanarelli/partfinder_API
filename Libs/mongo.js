@@ -13,17 +13,19 @@ if (process.env.NODE_ENV === 'development') {
   options.authSource = 'admin'
 }
 
-module.exports = function connection () {
-		mongoose.connect(
-		process.MONGODB_ADDON_URI,
-		option,
-		(err) => {
-			if (err) {
-				console.log(err)
-				setTimeout(connection, 20000)
-			} else {
-				console.log('Db is up')
-			}
-		}
-	)
+module.exports = connection()
+
+function connection () {
+  mongoose.connect(
+    process.env.MONGODB_ADDON_URI,
+    options,
+    (err) => {
+      if (err) {
+        console.log(err)
+        setTimeout(connection, 20000)
+      } else {
+        console.log('Db is up')
+      }
+    }
+  )
 }

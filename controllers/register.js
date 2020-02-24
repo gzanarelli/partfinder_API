@@ -10,7 +10,7 @@ const User = require('../Models/UserModel')
 const jwt = require('../Libs/jwt')
 const Promise = require('bluebird')
 
-router.post('signin',
+router.post('/signin',
   body('email')
     .exists()
     .withMessage('This field is required.')
@@ -49,7 +49,7 @@ router.post('signin',
   }
 )
 
-router.post('signup',
+router.post('/signup',
   body('email')
     .exists()
     .withMessage('This field is required.')
@@ -62,14 +62,17 @@ router.post('signup',
     .withMessage('Password must be at least 8 characters long.'),
   valid,
   (req, res, next) => {
+    console.log('entrer')
     const { email, password } = req.body
     User.findOne({ email })
       .then(user => {
+        console.log(user)
         if (user) {
           return next(boom.conflict())
         }
         crypt.hash(password, 10)
           .then(async (crypto) => {
+            console.log(crypto)
             const user = await new User({
               email,
               password: crypto,
@@ -85,5 +88,5 @@ router.post('signup',
 )
 
 module.exports = (app) => {
-	app.use('/', router)
+  app.use('/', router)
 }
