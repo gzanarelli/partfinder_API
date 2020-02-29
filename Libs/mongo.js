@@ -13,10 +13,10 @@ if (process.env.NODE_ENV === 'development') {
   options.authSource = 'admin'
 }
 
-module.exports = function connection () {
+function connection () {
 		mongoose.connect(
-		process.MONGODB_ADDON_URI,
-		option,
+		process.env.MONGODB_ADDON_URI,
+		options,
 		(err) => {
 			if (err) {
 				console.log(err)
@@ -27,3 +27,5 @@ module.exports = function connection () {
 		}
 	)
 }
+
+module.exports = connection()

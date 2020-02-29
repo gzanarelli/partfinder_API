@@ -30,7 +30,7 @@ glob
     debug('Require controller %s', controller)
 		require(controller)(router)
   })
-
+app.use(router)
 
 /**
  * Middleware Error

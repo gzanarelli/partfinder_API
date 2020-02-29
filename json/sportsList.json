@@ -1,0 +1,166 @@
+[{
+	"_id": "5d8f21099011853e55ef84fb",
+	"value": "tennis",
+	"label": "Tennis",
+	"level": [{
+			"label": "-15",
+			"value": 0
+		},
+		{
+			"label": "-4/6",
+			"value": 1
+		},
+		{
+			"label": "-2/6",
+			"value": 2
+		},
+		{
+			"label": "0",
+			"value": 3
+		},
+		{
+			"label": "1/6",
+			"value": 4
+		},
+		{
+			"label": "2/6",
+			"value": 5
+		},
+		{
+			"label": "3/6",
+			"value": 6
+		},
+		{
+			"label": "4/6",
+			"value": 7
+		},
+		{
+			"label": "5/6",
+			"value": 8
+		},
+		{
+			"label": "15",
+			"value": 9
+		},
+		{
+			"label": "15/1",
+			"value": 10
+		},
+		{
+			"label": "15/2",
+			"value": 11
+		},
+		{
+			"label": "15/3",
+			"value": 12
+		},
+		{
+			"label": "15/4",
+			"value": 13
+		},
+		{
+			"label": "15/5",
+			"value": 14
+		},
+		{
+			"label": "30",
+			"value": 15
+		},
+		{
+			"label": "30/1",
+			"value": 16
+		},
+		{
+			"label": "30/2",
+			"value": 17
+		},
+		{
+			"label": "30/3",
+			"value": 18
+		},
+		{
+			"label": "30/4",
+			"value": 19
+		},
+		{
+			"label": "30/5",
+			"value": 20
+		},
+		{
+			"label": "40",
+			"value": 21
+		},
+		{
+			"label": "NC",
+			"value": 22
+		}
+	],
+	"levelName": "Classement"
+},
+{
+	"_id": "5d8f2109de81425d792a0273",
+	"value": "foot",
+	"label": "Football",
+	"level": [
+		{"label": "National", "value": 0},
+		{"label": "National2", "value": 1},
+		{"label": "National3", "value": 2},
+		{"label": "Régional1", "value": 3},
+		{"label": "Régional2", "value": 4},
+		{"label": "Régional3", "value": 5},
+		{"label": "Départemental1", "value": 6},
+		{"label": "Départemental2", "value": 7},
+		{"label": "Départemental3", "value": 8},
+		{"label": "Départemental4", "value": 9}
+	],
+	"levelName": "Ligue"
+},
+{
+	"_id": "5d8f2109af3d9780f67c7c2e",
+	"value": "squash",
+	"label": "Squash",
+	"level": [
+		{"label": "1I", "value": 0},
+		{"label": "1N", "value": 1},
+		{"label": "2A", "value": 2},
+		{"label": "2B", "value": 3},
+		{"label": "2C", "value": 4},
+		{"label": "2D", "value": 5},
+		{"label": "3A", "value": 6},
+		{"label": "3B", "value": 7},
+		{"label": "3C", "value": 8},
+		{"label": "3D", "value": 9},
+		{"label": "4A", "value": 10},
+		{"label": "4B", "value": 11},
+		{"label": "4C", "value": 12},
+		{"label": "4D", "value": 13},
+		{"label": "5A", "value": 14},
+		{"label": "5B", "value": 15},
+		{"label": "5C", "value": 16},
+		{"label": "5D", "value": 17},
+		{"label": "NC", "value": 18}
+	],
+	"levelName": "Classement"
+},
+{
+	"_id": "5d8f2109ff9f0ffd11b5cdf1",
+	"value": "badminton",
+	"label": "Badminton",
+	"level": [
+		{"label": "N1", "value": 0},
+		{"label": "N2", "value": 1},
+		{"label": "N3", "value": 2},
+		{"label": "R4", "value": 3},
+		{"label": "R5", "value": 4},
+		{"label": "R6", "value": 5},
+		{"label": "D7", "value": 6},
+		{"label": "D8", "value": 7},
+		{"label": "D9", "value": 8},
+		{"label": "P10", "value": 9},
+		{"label": "P11", "value": 10},
+		{"label": "P12", "value": 11},
+		{"label": "NC", "value": 12}
+	],
+	"levelName": "Classement"
+}
+]

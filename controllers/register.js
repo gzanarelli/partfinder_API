@@ -6,11 +6,11 @@ const _ = require('lodash')
 const boom = require('boom')
 const { body } = require('express-validator')
 const crypt = require('../Libs/crypt')
-const User = require('../Models/UserModel')
+const UserModel = require('../Models/UserModel')
 const jwt = require('../Libs/jwt')
 const Promise = require('bluebird')
 
-router.post('signin',
+router.post('/signin',
   body('email')
     .exists()
     .withMessage('This field is required.')
@@ -23,7 +23,7 @@ router.post('signin',
   valid,
   (req, res, next) => {
     const { email, password } = req.body
-    User.findOne({ email: email })
+    UserModel.findOne({ email: email })
       .then(user => {
         if (!user) {
           return next(boom.unauthorized())
@@ -37,6 +37,7 @@ router.post('signin',
               token: jwt.sign(user, process.env.TOKEN_HS512, process.env.TOKEN_EXPIRE),
               refresh: jwt.sign(user, process.env.REFRESH_HS512, process.env.REFRESH_EXPIRE)
             }).then(props => {
+              console.log(props)
               res.header('Authorization', props.token)
               res.header('RefreshToken', props.refresh)
               res.json({ auth: props, user: _.omit(user, 'password') })
@@ -49,7 +50,7 @@ router.post('signin',
   }
 )
 
-router.post('signup',
+router.post('/signup',
   body('email')
     .exists()
     .withMessage('This field is required.')
@@ -63,14 +64,14 @@ router.post('signup',
   valid,
   (req, res, next) => {
     const { email, password } = req.body
-    User.findOne({ email })
+    UserModel.findOne({ email })
       .then(user => {
         if (user) {
           return next(boom.conflict())
         }
         crypt.hash(password, 10)
           .then(async (crypto) => {
-            const user = await new User({
+            const user = await new UserModel({
               email,
               password: crypto,
               roles: 'user',

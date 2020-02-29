@@ -8,28 +8,26 @@ const boom = require('boom')
 module.exports = {
   sign (user, secret, expiresIn) {
     return new Promise((resolve, reject) => {
-      let token = null
-      try {
-        token = jwt.sign(
+      console.log('token')  
+      jwt.sign(
           {
             user: _.omit(user, ['password'])
           },
           secret,
-          { algorithm: 'HS512', expiresIn: expiresIn }
-        )
-        return resolve(token)
-      } catch (err) {
-        return reject(err)
-      }
+          { algorithm: 'HS512', expiresIn: expiresIn })
+          .then((token) => {
+            console.log(token)
+            resolve(token)
+          })
+          .catch(err => console.log(err))
     })
   },
   verify (token) {
     return new Promise((resolve, reject) => {
       jwt.verify(token, process.env.TOKEN_HS512, (err, payload) => {
         if (err) {
-          return reject(boom.unauthorized(err))
+          reject(boom.unauthorized(err))
         }
-
         resolve(payload.user)
       })
     })
@@ -38,9 +36,8 @@ module.exports = {
     return new Promise((resolve, reject) => {
       jwt.verify(token, process.env.REFRESH_HS512, (err, payload) => {
         if (err) {
-          return reject(boom.unauthorized(err))
+          reject(boom.unauthorized(err))
         }
-
         resolve(payload.user)
       })
     })
