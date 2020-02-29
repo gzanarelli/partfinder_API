@@ -14,6 +14,6 @@ WORKDIR /app
 
 COPY . /app
 
-RUN yarn
+RUN npm install
 
 CMD npm run dev

@@ -25,10 +25,10 @@ require('./Libs/mongo')
  * Middleware controllers
  */
 glob
-  .sync(path.join(__dirname, '/./controllers/*.js'))
+  .sync(path.join(__dirname, './controllers/*.js'))
   .map(function (controller) {
     debug('Require controller %s', controller)
-		require(controller)(router)
+    require(controller)(router)
   })
 app.use(router)
 
@@ -46,6 +46,5 @@ app.use((err, req, res, next) => {
 app.use((req, res, next) => {
   res.status(404).json(boom.notFound())
 })
-
 
 app.listen(process.env.PORT || 8181, () => console.log(`Server is up on the port ${process.env.PORT}`))

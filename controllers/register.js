@@ -63,15 +63,22 @@ router.post('/signup',
     .withMessage('Password must be at least 8 characters long.'),
   valid,
   (req, res, next) => {
+    console.log('entrer')
     const { email, password } = req.body
     UserModel.findOne({ email })
       .then(user => {
+        console.log(user)
         if (user) {
           return next(boom.conflict())
         }
         crypt.hash(password, 10)
           .then(async (crypto) => {
+<<<<<<< HEAD
             const user = await new UserModel({
+=======
+            console.log(crypto)
+            const user = await new User({
+>>>>>>> develop
               email,
               password: crypto,
               roles: 'user',
@@ -86,5 +93,5 @@ router.post('/signup',
 )
 
 module.exports = (app) => {
-	app.use('/', router)
+  app.use('/', router)
 }
