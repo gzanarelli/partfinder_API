@@ -6,10 +6,10 @@ const valid = require('../Libs/validation')
 const _ = require('lodash')
 const User = require('../Models/UserModel')
 const GeolocModel = require('../Models/GeolocModel')
-const { body } = require('express-validator')
 const boom = require('boom')
 const geoloc = require('../Libs/geoloc')
 const mongoose = require('mongoose')
+const validUser = require('../validator/validUser')
 
 router.get('/',
   auth,
@@ -23,29 +23,7 @@ router.get('/',
 )
 
 router.post('/',
-  body('firstname')
-    .exists()
-    .isString(),
-  body('lastname')
-    .exists()
-    .isString(),
-  body('gender')
-    .exists()
-    .isString()
-    .isIn(['male', 'female'])
-    .withMessage('Only male or female accepted'),
-  body('age')
-    .exists()
-    .isNumeric(),
-  body('address')
-    .exists()
-    .isString(),
-  body('zipcode')
-    .exists()
-    .isNumeric(),
-  body('city')
-    .exists()
-    .isString(),
+  validUser.LIST,
   valid,
   auth,
   async (req, res, next) => {
@@ -59,7 +37,7 @@ router.post('/',
       if (!user) {
         return next(boom.unauthorized())
       }
-      await new GeolocModel({
+      new GeolocModel({
         _id: Id,
         userId: req.token._id,
         address: req.body.address,
@@ -68,35 +46,13 @@ router.post('/',
         'location.coordinates': [coor[0].longitude, coor[0].latitude],
         'location.type': 'Point'
       }).save()
-      res.json({ status: true })
+        .then(res.json({ status: true }))
     })
       .catch(err => next(err))
   })
 
 router.patch('/',
-  body('firstname')
-    .exists()
-    .isString(),
-  body('lastname')
-    .exists()
-    .isString(),
-  body('gender')
-    .exists()
-    .isString()
-    .isIn(['male', 'female'])
-    .withMessage('Only male or female accepted'),
-  body('age')
-    .exists()
-    .isNumeric(),
-  body('address')
-    .exists()
-    .isString(),
-  body('zipcode')
-    .exists()
-    .isNumeric(),
-  body('city')
-    .exists()
-    .isString(),
+  validUser.PATCH,
   valid,
   auth,
   async (req, res, next) => {
@@ -109,7 +65,7 @@ router.patch('/',
       if (!user) {
         return next(boom.unauthorized())
       }
-      await new GeolocModel({
+      new GeolocModel({
         userId: req.token._id,
         address: req.body.address,
         zipcode: req.body.zipcode,
@@ -117,13 +73,15 @@ router.patch('/',
         'location.coordinates': [coor[0].longitude, coor[0].latitude],
         'location.type': 'Point'
       })
-      res.json({ status: true })
+        .then(res.json({ status: true }))
     })
       .catch(err => next(err))
   }
 )
 
 router.delete('/:userId',
+  validUser.DELETE,
+  valid,
   auth,
   async (req, res, next) => {
     User.deleteOne({ _id: _.get(req, 'token._id', null) })
