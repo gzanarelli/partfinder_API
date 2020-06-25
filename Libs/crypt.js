@@ -3,10 +3,10 @@
 const bcrypt = require('bcryptjs')
 
 module.exports = {
-  hash(password) {
+  hash (password) {
     return bcrypt.hash(password, 10)
   },
-  compare(password, hash) {
+  compare (password, hash) {
     return bcrypt.compare(password, hash)
   }
 }

@@ -4,22 +4,16 @@ const router = require('express').Router()
 const valid = require('../Libs/validation')
 const _ = require('lodash')
 const boom = require('boom')
-const { body } = require('express-validator')
 const crypt = require('../Libs/crypt')
+const crypto = require('crypto')
 const User = require('../Models/UserModel')
+const RefreshToken = require('../Models/RefreshToken')
 const jwt = require('../Libs/jwt')
 const Promise = require('bluebird')
+const validAccount = require('../validator/validAccount')
 
 router.post('/signin',
-  body('email')
-    .exists()
-    .withMessage('This field is required.')
-    .isEmail()
-    .withMessage('A valid email is required.'),
-  body('password')
-    .exists()
-    .withMessage('This field is required.')
-    .isLength(8),
+  validAccount.SIGNIN,
   valid,
   (req, res, next) => {
     const { email, password } = req.body
@@ -29,19 +23,43 @@ router.post('/signin',
           return next(boom.unauthorized())
         }
         crypt.compare(password, user.password)
-          .then(confirm => {
+          .then(async confirm => {
             if (!confirm) {
               return next(boom.unauthorized())
             }
-            Promise.props({
-              token: jwt.sign(user, process.env.TOKEN_HS512, process.env.TOKEN_EXPIRE),
-              refresh: jwt.sign(user, process.env.REFRESH_HS512, process.env.REFRESH_EXPIRE)
-            }).then(props => {
-              res.header('Authorization', props.token)
-              res.header('RefreshToken', props.refresh)
-              res.json({ auth: props, user: _.omit(user, 'password') })
+
+            // create xsrfToken
+            const xsrfToken = crypto.randomBytes(64).toString('hex')
+            // create token
+            const accessToken = await jwt.sign(user, xsrfToken, process.env.TOKEN_HS512, process.env.TOKEN_EXPIRE)
+            // create refreshToken
+            const refreshToken = crypto.randomBytes(128).toString('base64')
+
+            // Save refreshToken in DB
+            await RefreshToken.create({
+              userId: user.id,
+              token: refreshToken,
+              expiresAt: Date.now() + process.env.REFRESH_EXPIRE
             })
-              .catch(err => { return next(err) })
+
+            res.cookie('access_token', accessToken, {
+              httpOnly: true,
+              secure: true,
+              maxAge: process.env.TOKEN_EXPIRE
+            })
+
+            res.cookie('refresh_token', refreshToken, {
+              httpOnly: true,
+              secure: true,
+              maxAge: process.env.REFRESH_EXPIRE,
+              path: '/token'
+            })
+
+            res.json({
+              accessTokenExpiresIn: process.env.TOKEN_EXPIRE,
+              refreshTokenExpiresIn: process.env.REFRESH_EXPIRE,
+              xsrfToken
+            })
           })
           .catch(err => { return next(err) })
       })
@@ -50,16 +68,7 @@ router.post('/signin',
 )
 
 router.post('/signup',
-  body('email')
-    .exists()
-    .withMessage('This field is required.')
-    .isEmail()
-    .withMessage('A valid email is required.'),
-  body('password')
-    .exists()
-    .withMessage('This field is required.')
-    .isLength({ min: 8 })
-    .withMessage('Password must be at least 8 characters long.'),
+  validAccount.SIGNUP,
   valid,
   (req, res, next) => {
     console.log('entrer')
