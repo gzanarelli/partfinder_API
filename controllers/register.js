@@ -9,6 +9,9 @@ const crypt = require('../Libs/crypt')
 const UserModel = require('../Models/UserModel')
 const jwt = require('../Libs/jwt')
 const Promise = require('bluebird')
+const crypto = require('crypto')
+const ms = require('ms')
+const RefreshTokenModel = require('../Models/RefreshTokenModel')
 
 router.post('/signin',
   body('email')
@@ -33,14 +36,34 @@ router.post('/signin',
             if (!confirm) {
               return next(boom.unauthorized())
             }
+            // Mettre le xsrf ici !
+            const xsrfToken = crypto.randomBytes(64).toString('hex')
             Promise.props({
-              token: jwt.sign(user, process.env.TOKEN_HS512, process.env.TOKEN_EXPIRE),
-              refresh: jwt.sign(user, process.env.REFRESH_HS512, process.env.REFRESH_EXPIRE)
+              'access-token': jwt.sign(user, process.env.TOKEN_HS512, process.env.TOKEN_EXPIRE, xsrfToken),
+              refreshToken: jwt.sign(user, process.env.REFRESH_HS512, process.env.REFRESH_EXPIRE)
             }).then(props => {
-              console.log(props)
-              res.header('Authorization', props.token)
-              res.header('RefreshToken', props.refresh)
-              res.json({ auth: props, user: _.omit(user, 'password') })
+              RefreshTokenModel.findOne({ userId: _.get(user, '_id') })
+                .then(token => {
+                  if (token) {
+                    token.refreshToken.push({
+                      token: props.refreshToken,
+                      device: 'test'
+                    })
+                    token.save()
+                  } else {
+                    const refresh = new RefreshTokenModel({
+                      userId: _.get(user, '_id'),
+                      refreshToken: [{
+                        token: props.refreshToken,
+                        device: 'test'
+                      }]
+                    })
+                    refresh.save()
+                  }
+                  res.cookie('x-access-token', props['access-token'])
+                  res.cookie('x-refresh-token', props.refreshToken)
+                  res.json({ tokenExpireIn: ms(process.env.TOKEN_EXPIRE), refreshTokenExpireIn: ms(process.env.REFRESH_EXPIRE), xsrfToken, user })
+                })
             })
               .catch(err => { return next(err) })
           })
@@ -73,12 +96,8 @@ router.post('/signup',
         }
         crypt.hash(password, 10)
           .then(async (crypto) => {
-<<<<<<< HEAD
-            const user = await new UserModel({
-=======
             console.log(crypto)
-            const user = await new User({
->>>>>>> develop
+            const user = await new UserModel({
               email,
               password: crypto,
               roles: 'user',

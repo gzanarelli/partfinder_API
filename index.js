@@ -12,7 +12,9 @@ const debug = require('debug')('partfinder:start:controller')
 /**
  * Set configs
  */
-app.use(cors())
+app.use(cors({
+  allowedHeaders: ['x-refresh-token', 'x-access-token']
+}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
