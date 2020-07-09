@@ -6,13 +6,10 @@ const Promise = require('bluebird')
 const boom = require('boom')
 
 module.exports = {
-  sign (user, secret, expiresIn, xsrf) {
+  sign (payload, secret, expiresIn) {
     return new Promise((resolve, reject) => {
       jwt.sign(
-        {
-          user: _.pick(user, ['email', 'firstname', 'lastname']),
-          xsrf
-        },
+        payload,
         secret,
         { algorithm: process.env.ALGO_TYPE, expiresIn: expiresIn },
         (err, token) => {
@@ -24,13 +21,15 @@ module.exports = {
       )
     })
   },
-  verify (token) {
+  verify (token, xsrfToken) {
     return new Promise((resolve, reject) => {
       jwt.verify(token, process.env.TOKEN_HS512, (err, payload) => {
         if (err) {
+          reject(err)
+        } else if (_.get(payload, 'xsrfToken') !== xsrfToken) {
           reject(boom.unauthorized(err))
         }
-        resolve(payload.user)
+        resolve(payload)
       })
     })
   },
@@ -40,7 +39,7 @@ module.exports = {
         if (err) {
           reject(boom.unauthorized(err))
         }
-        resolve(payload.user)
+        resolve(payload)
       })
     })
   }

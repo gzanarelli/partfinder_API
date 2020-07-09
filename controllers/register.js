@@ -12,7 +12,8 @@ const Promise = require('bluebird')
 const crypto = require('crypto')
 const ms = require('ms')
 const RefreshTokenModel = require('../Models/RefreshTokenModel')
-
+const createTokens = require('../Libs/refreshToken')
+// A finir module refreshToken
 router.post('/signin',
   body('email')
     .exists()
@@ -36,36 +37,17 @@ router.post('/signin',
             if (!confirm) {
               return next(boom.unauthorized())
             }
-            // Mettre le xsrf ici !
             const xsrfToken = crypto.randomBytes(64).toString('hex')
-            Promise.props({
-              'access-token': jwt.sign(user, process.env.TOKEN_HS512, process.env.TOKEN_EXPIRE, xsrfToken),
-              refreshToken: jwt.sign(user, process.env.REFRESH_HS512, process.env.REFRESH_EXPIRE)
-            }).then(props => {
-              RefreshTokenModel.findOne({ userId: _.get(user, '_id') })
-                .then(token => {
-                  if (token) {
-                    token.refreshToken.push({
-                      token: props.refreshToken,
-                      device: 'test'
-                    })
-                    token.save()
-                  } else {
-                    const refresh = new RefreshTokenModel({
-                      userId: _.get(user, '_id'),
-                      refreshToken: [{
-                        token: props.refreshToken,
-                        device: 'test'
-                      }]
-                    })
-                    refresh.save()
-                  }
-                  res.cookie('x-access-token', props['access-token'])
-                  res.cookie('x-refresh-token', props.refreshToken)
-                  res.json({ tokenExpireIn: ms(process.env.TOKEN_EXPIRE), refreshTokenExpireIn: ms(process.env.REFRESH_EXPIRE), xsrfToken, user })
-                })
-            })
-              .catch(err => { return next(err) })
+            const payload = {
+              user: _.pick(user, ['email', '_id'])
+            }
+            createTokens(payload, xsrfToken, user)
+              .then(props => {
+                res.cookie('x-access-token', props['x-access-token'])
+                res.cookie('x-refresh-token', props['x-refresh-token'])
+                res.json({ tokenExpireIn: props.tokenExpireIn, refreshTokenExpireIn: props.refreshTokenExpireIn, xsrf: props.xsrfToken, user: props.user })
+              })
+              .catch(next)
           })
           .catch(err => { return next(err) })
       })
