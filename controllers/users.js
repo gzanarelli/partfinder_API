@@ -16,9 +16,7 @@ router.get('/',
   async (req, res, next) => {
     User.findOne({ _id: _.get(req, 'token.payload.user._id', null) }).populate('geolocation').populate('sport')
       .then(user => {
-        console.log(req.token)
-        console.log('arrived')
-        res.json(_.omit(user, ['password', 'email']))
+        res.json(_.omit(user.toObject(), ['password', 'email']))
       })
       .catch(err => next(err))
   }

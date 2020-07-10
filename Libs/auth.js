@@ -30,6 +30,7 @@ module.exports = [
         if (err.name === 'TokenExpiredError') {
           jwt.refresh(req.get('x-refresh-token'))
             .then(valid => {
+              console.log('refresh valid')
               console.log(valid)
               UserModel.findOne({ email: _.get(valid, 'payload.user.email') })
                 .then(user => {
@@ -45,6 +46,8 @@ module.exports = [
                     .then(props => {
                       res.cookie('x-access-token', props['x-access-token'])
                       res.cookie('x-refresh-token', props['x-refresh-token'])
+                      req.token = props
+                      next()
                     })
                     .catch(next)
                 })
