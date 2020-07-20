@@ -42,7 +42,7 @@ module.exports = [
                     user: _.pick(valid, ['email', '_id'])
                   }
                   const xsrfToken = crypto.randomBytes(64).toString('hex')
-                  createTokens(payload, xsrfToken, user)
+                  createTokens(payload, xsrfToken, user, req.headers['user-agent'])
                     .then(props => {
                       res.cookie('x-access-token', props['x-access-token'])
                       res.cookie('x-refresh-token', props['x-refresh-token'])

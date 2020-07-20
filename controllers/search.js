@@ -67,5 +67,5 @@ router.get('/',
 )
 
 module.exports = (app) => {
-	app.use('/search', router)
+  app.use('/search', router)
 }

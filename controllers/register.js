@@ -7,11 +7,7 @@ const boom = require('boom')
 const { body } = require('express-validator')
 const crypt = require('../Libs/crypt')
 const UserModel = require('../Models/UserModel')
-const jwt = require('../Libs/jwt')
-const Promise = require('bluebird')
 const crypto = require('crypto')
-const ms = require('ms')
-const RefreshTokenModel = require('../Models/RefreshTokenModel')
 const createTokens = require('../Libs/refreshToken')
 // A finir module refreshToken
 router.post('/signin',

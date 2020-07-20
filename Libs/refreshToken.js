@@ -6,7 +6,7 @@ const _ = require('lodash')
 const ms = require('ms')
 const RefreshTokenModel = require('../Models/RefreshTokenModel')
 
-module.exports = (payload, xsrfToken, user) => {
+module.exports = (payload, xsrfToken, user, userAgent) => {
   return new Promise((resolve, reject) => {
     Promise.props({
       'access-token': jwt.sign({ payload, xsrfToken }, process.env.TOKEN_HS512, process.env.TOKEN_EXPIRE),
@@ -17,7 +17,7 @@ module.exports = (payload, xsrfToken, user) => {
           if (token) {
             token.refreshToken.push({
               token: props.refreshToken,
-              device: 'test'
+              userAgent
             })
             token.save()
           } else {
@@ -25,7 +25,7 @@ module.exports = (payload, xsrfToken, user) => {
               userId: _.get(payload, '_id'),
               refreshToken: [{
                 token: props.refreshToken,
-                device: 'test'
+                userAgent
               }]
             })
             refresh.save()
