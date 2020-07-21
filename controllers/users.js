@@ -3,10 +3,10 @@
 const router = require('express').Router()
 const auth = require('../Libs/auth')
 const valid = require('../Libs/validation')
+const validator = require('../validators/users')
 const _ = require('lodash')
 const User = require('../Models/UserModel')
 const GeolocModel = require('../Models/GeolocModel')
-const { body } = require('express-validator')
 const boom = require('boom')
 const geoloc = require('../Libs/geoloc')
 const mongoose = require('mongoose')
@@ -23,29 +23,7 @@ router.get('/',
 )
 
 router.post('/',
-  body('firstname')
-    .exists()
-    .isString(),
-  body('lastname')
-    .exists()
-    .isString(),
-  body('gender')
-    .exists()
-    .isString()
-    .isIn(['male', 'female'])
-    .withMessage('Only male or female accepted'),
-  body('age')
-    .exists()
-    .isNumeric(),
-  body('address')
-    .exists()
-    .isString(),
-  body('zipcode')
-    .exists()
-    .isNumeric(),
-  body('city')
-    .exists()
-    .isString(),
+  validator.POST,
   valid,
   auth,
   async (req, res, next) => {
@@ -53,7 +31,7 @@ router.post('/',
     const coor = await geoloc(req.body.address, req.body.zipcode)
     const Id = new mongoose.Types.ObjectId()
     User.updateOne(
-      { _id: _.get(req, 'token._id', null) },
+      { _id: _.get(req, 'token.payload.user._id', null) },
       { $set: data, location: Id }
     ).then(async (user) => {
       if (!user) {
@@ -61,7 +39,7 @@ router.post('/',
       }
       await new GeolocModel({
         _id: Id,
-        userId: req.token._id,
+        userId: req.token.payload.user._id,
         address: req.body.address,
         zipcode: req.body.zipcode,
         city: req.body.city,
@@ -74,43 +52,22 @@ router.post('/',
   })
 
 router.patch('/',
-  body('firstname')
-    .exists()
-    .isString(),
-  body('lastname')
-    .exists()
-    .isString(),
-  body('gender')
-    .exists()
-    .isString()
-    .isIn(['male', 'female'])
-    .withMessage('Only male or female accepted'),
-  body('age')
-    .exists()
-    .isNumeric(),
-  body('address')
-    .exists()
-    .isString(),
-  body('zipcode')
-    .exists()
-    .isNumeric(),
-  body('city')
-    .exists()
-    .isString(),
+  validator.PATCH,
   valid,
   auth,
   async (req, res, next) => {
     const data = _.pick(req.body, ['firstname', 'lastname', 'gender', 'age'])
+    console.log('toto')
     const coor = await geoloc(req.body.address, req.body.zipcode)
     User.updateOne(
-      { _id: _.get(req, 'token._id', null) },
+      { _id: _.get(req, 'token.payload.user._id', null) },
       { $set: data }
     ).then(async (user) => {
       if (!user) {
         return next(boom.unauthorized())
       }
       await new GeolocModel({
-        userId: req.token._id,
+        userId: req.token.payload.user._id,
         address: req.body.address,
         zipcode: req.body.zipcode,
         city: req.body.city,
@@ -124,9 +81,11 @@ router.patch('/',
 )
 
 router.delete('/:userId',
+  validator.DELETE,
+  valid,
   auth,
-  async (req, res, next) => {
-    User.deleteOne({ _id: _.get(req, 'token._id', null) })
+  (req, res, next) => {
+    User.deleteOne({ _id: _.get(req, 'token.payload.user._id', null) })
       .then(() => {
         res.json({ status: true })
       })

@@ -24,7 +24,6 @@ module.exports = [
     jwt.verify(req.get('x-access-token'), req.get('x-xsrf-token'))
       .then(valid => {
         req.token = valid
-        next()
       })
       .catch(err => {
         if (err.name === 'TokenExpiredError') {
@@ -58,5 +57,6 @@ module.exports = [
           return next(err)
         }
       })
+      .finally(next)
   }
 ]

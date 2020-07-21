@@ -11,6 +11,7 @@ router.get('/',
   auth,
   async (req, res, next) => {
     let { rayon, sport, day, start, end, level } = req.query
+    console.log(req.query)
     // set one sport in user for the moment
     if (!day) {
       day = { $in: ['monday', 'thursday', 'wednesday', 'tuesday', 'friday', 'saturday', 'sunday'] }
@@ -23,8 +24,10 @@ router.get('/',
       userLevel = user.sport.find(e => e.value === sport) === undefined ? select.level[select.level.length - 1].value : user.sport.find(e => e.value === sport).level
       setLevel = { $lte: userLevel + 2, $gte: userLevel - 2 }
     }
-    GeolocModel.findOne({ userId: req.token._id }).populate('sport')
+    console.log(req.token)
+    GeolocModel.findOne({ userId: _.get(req, 'token.payload.user._id', null) }).populate('sport')
       .then(user => {
+        console.log(user)
         GeolocModel.find()
           .where('location.coordinates')
           .near({
