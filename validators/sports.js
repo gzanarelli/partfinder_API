@@ -3,6 +3,7 @@
 const { body, param } = require('express-validator')
 const extractByKey = require('../utils/extractByKey')
 const sportList = extractByKey('value', require('../json/sportsList.json'))
+const _ = require('lodash')
 
 module.exports = {
   POST: [

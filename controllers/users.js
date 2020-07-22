@@ -14,7 +14,7 @@ const mongoose = require('mongoose')
 router.get('/',
   auth,
   async (req, res, next) => {
-    User.findOne({ _id: _.get(req, 'token.payload.user._id', null) }).populate('geolocation').populate('sport')
+    (await User.findOne({ _id: _.get(req, 'token.payload.user._id', null) }).populate('geolocation')).populate('sport')
       .then(user => {
         res.json(_.omit(user.toObject(), ['password', 'email']))
       })
@@ -29,22 +29,21 @@ router.post('/',
   async (req, res, next) => {
     const data = _.pick(req.body, ['firstname', 'lastname', 'gender', 'age'])
     const coor = await geoloc(req.body.address, req.body.zipcode)
+    console.log(coor)
     const Id = new mongoose.Types.ObjectId()
     User.updateOne(
       { _id: _.get(req, 'token.payload.user._id', null) },
-      { $set: data, location: Id }
+      { $set: data, geolocation: Id }
     ).then(async (user) => {
-      if (!user) {
-        return next(boom.unauthorized())
-      }
+      console.log(user)
       await new GeolocModel({
         _id: Id,
         userId: req.token.payload.user._id,
         address: req.body.address,
         zipcode: req.body.zipcode,
         city: req.body.city,
-        'location.coordinates': [coor[0].longitude, coor[0].latitude],
-        'location.type': 'Point'
+        'geolocation.coordinates': [coor[0].longitude, coor[0].latitude],
+        'geolocation.type': 'Point'
       }).save()
       res.json({ status: true })
     })
@@ -56,25 +55,26 @@ router.patch('/',
   valid,
   auth,
   async (req, res, next) => {
-    const data = _.pick(req.body, ['firstname', 'lastname', 'gender', 'age'])
-    console.log('toto')
+    const data = _.pick(req.body, ['firstname', 'lastname', 'gender', 'age', 'address', 'zipcode', 'city'])
     const coor = await geoloc(req.body.address, req.body.zipcode)
     User.updateOne(
       { _id: _.get(req, 'token.payload.user._id', null) },
       { $set: data }
-    ).then(async (user) => {
-      if (!user) {
-        return next(boom.unauthorized())
-      }
-      await new GeolocModel({
-        userId: req.token.payload.user._id,
-        address: req.body.address,
-        zipcode: req.body.zipcode,
-        city: req.body.city,
-        'location.coordinates': [coor[0].longitude, coor[0].latitude],
-        'location.type': 'Point'
+    ).then(() => {
+      GeolocModel.updateOne({ userId: req.token.payload.user._id }, {
+        $set: {
+          userId: req.token.payload.user._id,
+          address: req.body.address,
+          zipcode: req.body.zipcode,
+          city: req.body.city,
+          'geolocation.coordinates': [coor[0].longitude, coor[0].latitude],
+          'geolocation.type': 'Point'
+        }
+      }).then((e) => {
+        console.log(e)
+        res.json({ status: true })
       })
-      res.json({ status: true })
+        .catch(next)
     })
       .catch(err => next(err))
   }

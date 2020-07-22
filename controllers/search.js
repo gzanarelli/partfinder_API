@@ -10,6 +10,7 @@ const router = require('express').Router()
 router.get('/',
   auth,
   async (req, res, next) => {
+    console.log('---- NETER ----')
     let { rayon, sport, day, start, end, level } = req.query
     console.log(req.query)
     // set one sport in user for the moment
@@ -29,9 +30,9 @@ router.get('/',
       .then(user => {
         console.log(user)
         GeolocModel.find()
-          .where('location.coordinates')
+          .where('geolocation.coordinates')
           .near({
-            center: [user.location.coordinates[0], user.location.coordinates[1]],
+            center: [user.geolocation.coordinates[0], user.geolocation.coordinates[1]],
             maxDistance: rayon / 6371,
             spherical: true
           })
@@ -56,8 +57,8 @@ router.get('/',
               }
             })
               .populate('userId')
-              .populate('location')
-              .sort({ location: 1 })
+              .populate('geolocation')
+              .sort({ geolocation: 1 })
               .then(partners => {
                 res.json(partners)
               })
